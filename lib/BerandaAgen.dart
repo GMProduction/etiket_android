@@ -12,6 +12,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 
 import 'blocks/baseBloc.dart';
+import 'component/JustHelper.dart';
 import 'component/NavDrawer.dart';
 import 'component/commonPadding.dart';
 import 'component/genColor.dart';
@@ -35,7 +36,7 @@ class _BerandaAgenState extends State<BerandaAgen> with WidgetsBindingObserver {
     "xp": 0,
     "up-level": 1000,
     "foto":
-        "https://i1.hdslb.com/bfs/archive/1c619fbdf3fb4a2171598e17b7bee680d5fab2ff.png"
+    "https://i1.hdslb.com/bfs/archive/1c619fbdf3fb4a2171598e17b7bee680d5fab2ff.png"
   };
 
   final req = new GenRequest();
@@ -82,13 +83,13 @@ class _BerandaAgenState extends State<BerandaAgen> with WidgetsBindingObserver {
   var clientId;
   var stateHari;
   var kelas, dariValue, keValue, totalpenumpang;
-  dynamic dataJadwal;
+  dynamic dataKapal;
 
   @override
   void initState() {
     // TODO: implement initState
     // analytics.
-    getKelas();
+    getKapal();
 
     WidgetsBinding.instance.addObserver(this);
     super.initState();
@@ -96,11 +97,6 @@ class _BerandaAgenState extends State<BerandaAgen> with WidgetsBindingObserver {
 
 //  FUNCTION
 
-  getKelas() async {
-    dataJadwal = await req.getApi("jadwal?id=1");
-    // kelas = await getPrefferenceKelas();
-    setState(() {});
-  }
 
 //  getClientId() async {
 //    clientId = await getPrefferenceIdClient();
@@ -108,10 +104,6 @@ class _BerandaAgenState extends State<BerandaAgen> with WidgetsBindingObserver {
 //      print("CLIENT ID" + clientId);
 //    }
 //  }
-
-  getProfileAbsen() async {
-    // await profileBloc.getProfile(reload: true);
-  }
 
   String clienId;
 
@@ -137,8 +129,14 @@ class _BerandaAgenState extends State<BerandaAgen> with WidgetsBindingObserver {
 
     ScreenUtil.init(
         BoxConstraints(
-            maxWidth: MediaQuery.of(context).size.width,
-            maxHeight: MediaQuery.of(context).size.height),
+            maxWidth: MediaQuery
+                .of(context)
+                .size
+                .width,
+            maxHeight: MediaQuery
+                .of(context)
+                .size
+                .height),
         designSize: Size(360, 690),
         orientation: Orientation.portrait);
     bloc = Provider.of<BaseBloc>(context);
@@ -164,23 +162,6 @@ class _BerandaAgenState extends State<BerandaAgen> with WidgetsBindingObserver {
         centerTitle: true,
         backgroundColor: GenColor.primaryColor,
         elevation: 0,
-        actions: <Widget>[
-          Padding(
-              padding: EdgeInsets.only(right: 20.0),
-              child: GestureDetector(
-                onTap: () {
-                  // Navigator.pushNamed(context, "notifikasi", arguments: );
-                },
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.notifications,
-                      size: 26.0,
-                    ),
-                  ],
-                ),
-              )),
-        ],
       ),
       body: SafeArea(
         child: Column(
@@ -191,97 +172,154 @@ class _BerandaAgenState extends State<BerandaAgen> with WidgetsBindingObserver {
             ),
             CommonPadding(
                 child: GenText(
-              "Jadwal kapal yang akan berangkat",
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            )),
+                  "Jadwal kapal yang akan berangkat",
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                )),
             SizedBox(
               height: 20,
             ),
             Expanded(
-                child: SingleChildScrollView(
-                    child: Column(children: [
-              CommonPadding(
-                child: InkWell(
-
-                  child: Container(
-                    width: double.infinity,
-                    margin: EdgeInsets.only(bottom: 20),
-                    decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(5),
-                        boxShadow: GenShadow()
-                            .genShadow(radius: 3.w, offset: Offset(0, 2.w))),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Image.network(
-                          "https://img.inews.co.id/media/822/files/inews_new/2021/02/25/Screenshot_20210225_100311_Samsung_Internet.jpg",
-                          height: 150,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                        ),
-                        SizedBox(height: 15,),
-                        CommonPadding(
-                          child: Column(
-                            children: [
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Column(
-                                      children: [
-                                        GenText("Asal", style: TextStyle( fontSize: 12),),
-                                        SizedBox(height: 5,),
-                                        GenText("Asal", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),),
-                                      ],
-                                    ),
+                child: dataKapal == null
+                    ? Center(child: CircularProgressIndicator())
+                    : SingleChildScrollView(
+                    child: Column(children: dataKapal.map<Widget>((e) {
+                      return CommonPadding(
+                        child: InkWell(
+                          child: Container(
+                            width: double.infinity,
+                            margin: EdgeInsets.only(bottom: 20),
+                            decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(5),
+                                boxShadow: GenShadow()
+                                    .genShadow(
+                                    radius: 3.w, offset: Offset(0, 2.w))),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                e["kapal"]["image"] == null ?
+                                Image.asset("asset/logo.png") : Image.network(
+                                  ip + e["kapal"]["image"],
+                                  height: 150,
+                                  width: double.infinity,
+                                  fit: BoxFit.cover,
+                                ),
+                                SizedBox(
+                                  height: 15,
+                                ),
+                                CommonPadding(
+                                  child: Column(
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: Column(
+                                              children: [
+                                                GenText(
+                                                  "Asal",
+                                                  style: TextStyle(
+                                                      fontSize: 12),
+                                                ),
+                                                SizedBox(
+                                                  height: 5,
+                                                ),
+                                                GenText(
+                                                  e["asal"]["nama"],
+                                                  style: TextStyle(
+                                                      fontWeight: FontWeight
+                                                          .bold,
+                                                      fontSize: 16),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          SizedBox(
+                                            width: 20,
+                                          ),
+                                          Icon(Icons.arrow_forward),
+                                          SizedBox(
+                                            width: 20,
+                                          ),
+                                          Expanded(
+                                            child: Column(
+                                              children: [
+                                                GenText(
+                                                  "Tujuan",
+                                                  style: TextStyle(
+                                                      fontSize: 12),
+                                                ),
+                                                SizedBox(
+                                                  height: 5,
+                                                ),
+                                                GenText(
+                                                  e["tujuan"]["nama"],
+                                                  style: TextStyle(
+                                                      fontWeight: FontWeight
+                                                          .bold,
+                                                      fontSize: 16),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      SizedBox(
+                                        height: 10,
+                                      ),
+                                      GenText(
+                                        "Hari Keberangkatan",
+                                        style: TextStyle(fontSize: 12),
+                                      ),
+                                      SizedBox(
+                                        height: 5,
+                                      ),
+                                      GenText(
+                                        formatHari(e["hari"]) + ", " + e["jam"],
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16),
+                                      ),
+                                      SizedBox(
+                                        height: 20,
+                                      ),
+                                      GenButton(
+                                        text: "Scan QR",
+                                        padding: EdgeInsets.all(10),
+                                        textSize: 16,
+                                        ontap: () {
+                                          Navigator.pushNamed(
+                                              context, "scanqr");
+                                        },
+                                      )
+                                    ],
                                   ),
-                                  SizedBox(width: 20,),
-                                  Icon(Icons.arrow_forward),
-                                  SizedBox(width: 20,),
-                                  Expanded(
-                                    child: Column(
-                                      children: [
-                                        GenText("Tujuan", style: TextStyle( fontSize: 12),),
-                                        SizedBox(height: 5,),
-                                        GenText("Tujuan", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(height: 10,),
-                              GenText("Tanggal Keberangkatan", style: TextStyle( fontSize: 12),),
-                              SizedBox(height: 5,),
-                              GenText("12 September 2021", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),),
+                                ),
+                                SizedBox(
+                                  height: 15,
+                                ),
+                              ],
+                            ),
+                          )
+                          ,
+                        )
+                        ,
+                      );
+                    }).toList(),)
 
-
-                              SizedBox(height: 20,),
-                              GenButton(text: "Scan QR", padding: EdgeInsets.all(10), textSize: 16, ontap: (){
-                                Navigator.pushNamed(context, "scanqr");
-                              },)
-                            ],
-                          ),
-
-                        ),
-                        SizedBox(height: 15,),
-                      ],
-                    ),
-                  ),
-                ),
-              )
-            ])))
+                )
+            )
           ],
         ),
       ),
     );
   }
 
-// void getJaddwal(id) async {
-//   dataJadwal = await req.getApi("jadwal?id=" + id.toString());
-//
-//   print("DATA $dataJadwal");
-//   print("length" +dataJadwal.length.toString());
-//
-//   setState(() {});
-// }
+  void getKapal() async {
+    dataKapal = await req.getApi("agen/kapal");
+
+    print("DATA $dataKapal");
+    print("length" + dataKapal.length.toString());
+
+    setState(() {});
+  }
 }

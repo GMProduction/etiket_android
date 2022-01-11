@@ -1,6 +1,7 @@
 // ignore: file_names
 import 'dart:io';
 
+import 'package:etiket/component/genToast.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -28,8 +29,6 @@ class ScanQR extends StatefulWidget {
   _ScanQRState createState() => _ScanQRState();
 }
 
-
-
 class _ScanQRState extends State<ScanQR> with WidgetsBindingObserver {
   final req = new GenRequest();
 
@@ -41,6 +40,7 @@ class _ScanQRState extends State<ScanQR> with WidgetsBindingObserver {
 
   // NotifBloc notifbloc;
   bool isLoaded = false;
+
 //  double currentgurulainValue = 0;
   PageController gurulainController = PageController();
   var stateMetodBelajar = 1;
@@ -48,13 +48,15 @@ class _ScanQRState extends State<ScanQR> with WidgetsBindingObserver {
   var clientId;
   var stateHari;
   var kelas;
-  dynamic dataJadwal;
+  dynamic dataScan;
+  bool readyToScan = true;
 
   void _onQRViewCreated(QRViewController controller) {
     this.controller = controller;
     controller.scannedDataStream.listen((scanData) {
       setState(() {
         result = scanData;
+        scan(result.code);
       });
     });
   }
@@ -77,8 +79,6 @@ class _ScanQRState extends State<ScanQR> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     super.initState();
   }
-
-
 
 //  getRoom() async {
 //    clienId = await getPrefferenceIdClient();
@@ -149,7 +149,7 @@ class _ScanQRState extends State<ScanQR> with WidgetsBindingObserver {
         ],
       ),
       body: SafeArea(
-        child:Column(
+        child: Column(
           children: <Widget>[
             Expanded(
               flex: 5,
@@ -161,11 +161,17 @@ class _ScanQRState extends State<ScanQR> with WidgetsBindingObserver {
             Expanded(
               flex: 1,
               child: Center(
-                child: (result != null)
-                    ? Text(
-                    'Barcode Type: ${describeEnum(result.format)}   Data: ${result.code}')
-                    : Text('Scan a code'),
-              ),
+                  child: readyToScan
+                      ? GenText("scan Tiket")
+                      : GenButton(
+                          radius: 0,
+                          text: "Scan Lagi",
+                          ontap: () {
+                            setState(() {
+                              readyToScan = true;
+                            });
+                          },
+                        )),
             )
           ],
         ),
@@ -173,12 +179,18 @@ class _ScanQRState extends State<ScanQR> with WidgetsBindingObserver {
     );
   }
 
-// void getJaddwal(id) async {
-//   dataJadwal = await req.getApi("jadwal?id=" + id.toString());
-//
-//   print("DATA $dataJadwal");
-//   print("length" +dataJadwal.length.toString());
-//
-//   setState(() {});
-// }
+  void scan(id) async {
+    if (readyToScan) {
+      dataScan = await req.getApi("agen/scan-qr?id=" + id.toString());
+
+      if (dataScan != null) {
+        toastShow(dataScan.toString(), context, Colors.black);
+        readyToScan = false;
+      }
+      print("DATA $dataScan");
+      print("length" + dataScan.length.toString());
+
+      setState(() {});
+    }
+  }
 }

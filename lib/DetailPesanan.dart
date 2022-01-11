@@ -408,7 +408,7 @@ class _DetailPesananState extends State<DetailPesanan>
       var checkout = await req.getApi("user/pesanan/checkout");
 
       if (checkout == "Berhasil") {
-        Navigator.pushReplacementNamed(context, "transaksi");
+        Navigator.pushReplacementNamed(context, "tagihan");
       }
       print("checkout $checkout");
     }

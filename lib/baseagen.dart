@@ -33,7 +33,7 @@ class _BaseAgenState extends State<BaseAgen> {
 
   final _widgetOptions = [
     BerandaAgen(),
-    TransaksiAgen(),
+    // TransaksiAgen(),
     ProfilAgen(),
   ];
 

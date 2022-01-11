@@ -113,12 +113,18 @@ class _TransaksiState extends State<Transaksi> with WidgetsBindingObserver {
               height: 20,
             ),
             Expanded(
-                child: dataPesanan.length == 0
+                child: dataPesanan == null
                     ? Center(child: CircularProgressIndicator())
                     : SingleChildScrollView(
                         child: Column(
                             children: dataPesanan.map<Widget>((e) {
-                        return CommonPadding(
+
+                              var kapal = e["pesanan"][0]["jadwal"]["kapal"];
+                              var jadwal = e["pesanan"][0]["jadwal"];
+                              var asal = e["pesanan"][0]["jadwal"]["asal"];
+                              var tujuan = e["pesanan"][0]["jadwal"]["tujuan"];
+
+                        return e["status"] != 1 ? Container() : CommonPadding(
                           child: Container(
                             width: double.infinity,
                             margin: EdgeInsets.only(bottom: 20),
@@ -130,8 +136,9 @@ class _TransaksiState extends State<Transaksi> with WidgetsBindingObserver {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
+                                GenText(e["pesanan"][0]["jadwal"]["kapal"]["nama"].toString()),
                                 Image.network(
-                                  ip + e["kapal"]["kapal"]["image"],
+                                  ip + kapal["image"],
                                   height: 150,
                                   width: double.infinity,
                                   fit: BoxFit.cover,
@@ -155,13 +162,13 @@ class _TransaksiState extends State<Transaksi> with WidgetsBindingObserver {
                                                 CrossAxisAlignment.start,
                                             children: [
                                               GenText(
-                                                e["pesanan"]["nama"],
+                                                e["pesanan"][0]["nama"],
                                                 style: TextStyle(
                                                     fontSize: 18,
                                                     fontWeight:
                                                         FontWeight.bold),
                                               ),
-                                              e["pesanan"]["status"] == 1
+                                              e["pesanan"][0]["status"] == 1
                                                   ? GenText(
                                                       "Tiket Belum dipakai",
                                                       style: TextStyle(
@@ -182,14 +189,14 @@ class _TransaksiState extends State<Transaksi> with WidgetsBindingObserver {
                                             children: [
                                               GenText(
                                                 formatTanggalFromString(
-                                                    e["pesanan"]["tanggal"]),
+                                                    e["pesanan"][0]["tanggal"]),
                                                 style: TextStyle(
                                                     fontSize: 16,
                                                     fontWeight:
                                                         FontWeight.bold),
                                               ),
                                               GenText(
-                                                e["kapal"]["jam"].toString(),
+                                               kapal["nama"],
                                                 style: TextStyle(
                                                     fontSize: 16,
                                                     fontWeight:
@@ -207,13 +214,12 @@ class _TransaksiState extends State<Transaksi> with WidgetsBindingObserver {
                                             CrossAxisAlignment.start,
                                         children: [
                                           GenText(
-                                            e["kapal"]["kapal"]["nama"],
+                                            e["pesanan"].length.toString(),
                                             style: TextStyle(
                                                 fontSize: 16,
                                                 fontWeight: FontWeight.bold),
                                           ),
-                                          GenText(e["kapal"]["kapal"]
-                                              ["keterangan"]),
+                                          GenText("Penumpang"),
                                         ],
                                       ),
                                       SizedBox(
@@ -239,8 +245,7 @@ class _TransaksiState extends State<Transaksi> with WidgetsBindingObserver {
                                                         height: 5,
                                                       ),
                                                       GenText(
-                                                        e["kapal"]["asal"]
-                                                            ["nama"],
+                                                        asal["nama"].toString(),
                                                         style: TextStyle(
                                                             fontWeight:
                                                                 FontWeight.bold,
@@ -268,8 +273,7 @@ class _TransaksiState extends State<Transaksi> with WidgetsBindingObserver {
                                                         height: 5,
                                                       ),
                                                       GenText(
-                                                        e["kapal"]["tujuan"]
-                                                            ["nama"],
+                                                        tujuan["nama"].toString(),
                                                         style: TextStyle(
                                                             fontWeight:
                                                                 FontWeight.bold,
@@ -287,7 +291,7 @@ class _TransaksiState extends State<Transaksi> with WidgetsBindingObserver {
                                             SizedBox(
                                               height: 20,
                                             ),
-                                            e["pesanan"]["status"] == 2 ? Container() :
+                                            e["pesanan"][0]["status"] == 2 ? Container() :
                                             GenButton(
                                               text: "QR Code",
                                               padding: EdgeInsets.all(10),
@@ -295,7 +299,7 @@ class _TransaksiState extends State<Transaksi> with WidgetsBindingObserver {
                                               ontap: () {
                                                 Navigator.pushNamed(
                                                     context, "qrcode", arguments: QRCode(
-                                                  kode: e["pesanan"]["kode_tiket"]
+                                                  kode: e["pesanan"][0]["kode_tiket"]
                                                 ));
                                               },
                                             )
@@ -323,28 +327,29 @@ class _TransaksiState extends State<Transaksi> with WidgetsBindingObserver {
   }
 
   void getPesanan() async {
-    dataPesanan = [];
+    // dataPesanan = [];
 
-    var dataPembayaran = await req.getApi("user/pembayaran");
+    dataPesanan = await req.getApi("user/pembayaran");
 
-    if (dataPembayaran != null) {
-      if (dataPembayaran.length > 0) {
-        for (var i = 0; i < dataPembayaran.length; i++) {
-          if (dataPembayaran[i]["status"] == 1) {
-            var idJ = dataPembayaran[i]["pesanan"][i]["id_jadwal"];
-            var dataKapal = await req.getApi("user/kapal/$idJ");
-            for (var j = 0; j < dataPembayaran[i]["pesanan"].length; j++) {
-              dataPesanan.add({
-                "pesanan": dataPembayaran[i]["pesanan"][j],
-                "kapal": dataKapal
-              });
-            }
-          }
-        }
-      }
-    }
 
-    print("DATA $dataPesanan");
+    // if (dataPembayaran != null) {
+    //   if (dataPembayaran.length > 0) {
+    //     for (var i = 0; i < dataPembayaran.length; i++) {
+    //       if (dataPembayaran[i]["status"] == 1) {
+    //         var idJ = dataPembayaran[i]["pesanan"][i]["id_jadwal"];
+    //         var dataKapal = await req.getApi("user/kapal/$idJ");
+    //         for (var j = 0; j < dataPembayaran[i]["pesanan"].length; j++) {
+    //           dataPesanan.add({
+    //             "pesanan": dataPembayaran[i]["pesanan"][j],
+    //             "kapal": dataKapal
+    //           });
+    //         }
+    //       }
+    //     }
+    //   }
+    // }
+
+    print("DATA PESANAN $dataPesanan");
     print("length" + dataPesanan.length.toString());
 
     setState(() {});
